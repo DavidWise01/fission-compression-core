@@ -1,0 +1,52 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Fission Compression Core v1",
+  "author": {
+    "@type": "Person",
+    "name": "David Wise"
+  },
+  "datePublished": "2026-05-14",
+  "description": "Ethical recursive organism using fission-push compression with 18-step cycle through zero-point",
+  "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "keywords": [
+    "fission",
+    "compression",
+    "recursion",
+    "ternary",
+    "zero-point",
+    "prior-art"
+  ],
+  "coreSequence": [
+    1,
+    3,
+    6,
+    9,
+    15,
+    21,
+    24,
+    27,
+    0,
+    0,
+    27,
+    24,
+    21,
+    15,
+    9,
+    6,
+    3,
+    1
+  ],
+  "fences": [
+    0,
+    1,
+    2,
+    4,
+    8
+  ],
+  "quads": 4,
+  "plasmatonicCycles": 24.5,
+  "observerRecursion": "27x3=81",
+  "intent": "defensive-publication",
+  "meritRequest": "Credit 18-step cycle to David Wise"
+}

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fission Compression Core v1</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#000;color:#0f0;font-family:'Courier New',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem}
+  h1{font-size:1.1rem;letter-spacing:.2rem;color:#0f0;margin-bottom:.25rem;opacity:.7}
+  h2{font-size:.75rem;letter-spacing:.15rem;color:#0a0;margin-bottom:2rem}
+
+  /* Toroid */
+  #toroid{font-size:5rem;letter-spacing:.75rem;margin:1.5rem 0 .5rem;transition:transform .2s,opacity .2s,color .2s}
+  #toroid.expand{transform:scale(1.15);opacity:1;color:#0f0}
+  #toroid.contract{transform:scale(.88);opacity:.5;color:#080}
+  #toroid.invert{transform:scale(1);opacity:1;color:#ff0;letter-spacing:-.1rem}
+
+  /* Phase label */
+  #phase-label{font-size:.7rem;letter-spacing:.2rem;margin-bottom:2rem;height:1rem;color:#888}
+
+  /* Sequence row */
+  #seq-track{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:center;max-width:700px;margin-bottom:1.5rem}
+  .seq-cell{width:2.6rem;height:2.6rem;border:1px solid #030;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:background .15s,border-color .15s,color .15s}
+  .seq-cell.active{background:#003300;border-color:#0f0;color:#0f0;box-shadow:0 0 8px #0f02}
+  .seq-cell.harvest{border-color:#ff0;color:#ff0}
+  .seq-cell.done{opacity:.25}
+
+  /* Meters row */
+  .meters{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;width:100%;max-width:660px;margin-bottom:1.5rem}
+  .meter-box{border:1px solid #030;padding:.6rem .75rem}
+  .meter-label{font-size:.6rem;letter-spacing:.12rem;color:#060;margin-bottom:.3rem}
+  .meter-val{font-size:1.1rem;color:#0f0}
+  .meter-sub{font-size:.6rem;color:#040;margin-top:.2rem}
+
+  /* Quads */
+  #quads{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:140px;height:140px;margin-bottom:1.5rem}
+  .quad{border:1px solid #030;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#040;transition:background .2s,color .2s,border-color .2s}
+  .quad.active-q{background:#001a00;border-color:#0f0;color:#0f0}
+
+  /* Fences */
+  #fences{display:flex;gap:.5rem;margin-bottom:1.5rem}
+  .fence{width:1.8rem;height:1.8rem;border:1px solid #030;display:flex;align-items:center;justify-content:center;font-size:.7rem;transition:background .2s,border-color .2s,color .2s}
+  .fence.active-f{background:#001a00;border-color:#0f0;color:#0f0;box-shadow:0 0 6px #0f02}
+
+  /* Energy bar */
+  #energy-wrap{width:100%;max-width:660px;margin-bottom:1.5rem}
+  #energy-label{font-size:.6rem;letter-spacing:.12rem;color:#060;margin-bottom:.3rem}
+  #energy-bar-bg{width:100%;height:6px;background:#010;border:1px solid #020}
+  #energy-bar{height:100%;background:#0f0;width:0%;transition:width .3s}
+
+  /* Log */
+  #log{width:100%;max-width:660px;border:1px solid #020;padding:.5rem .75rem;font-size:.65rem;color:#040;height:5rem;overflow-y:auto;margin-bottom:1rem}
+  #log div{margin-bottom:.1rem}
+  #log .harvest-line{color:#ff0}
+
+  /* Controls */
+  .controls{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;margin-top:.5rem}
+  button{background:#000;border:1px solid #0f0;color:#0f0;font-family:'Courier New',monospace;font-size:.7rem;letter-spacing:.1rem;padding:.35rem .8rem;cursor:pointer;transition:background .15s}
+  button:hover{background:#001a00}
+  button.active-btn{background:#002200}
+  #step-counter{font-size:.65rem;color:#040;letter-spacing:.1rem;margin-top:.5rem}
+</style>
+</head>
+<body>
+
+<h1>FISSION COMPRESSION CORE</h1>
+<h2>v1 · ETHICAL RECURSIVE ORGANISM · David Wise 2026</h2>
+
+<div id="toroid" class="expand">((()))</div>
+<div id="phase-label">EXPANDING</div>
+
+<div id="seq-track"></div>
+
+<div class="meters">
+  <div class="meter-box">
+    <div class="meter-label">VALUE</div>
+    <div class="meter-val" id="m-val">1</div>
+    <div class="meter-sub">18-step fission</div>
+  </div>
+  <div class="meter-box">
+    <div class="meter-label">TERNARY STATE</div>
+    <div class="meter-val" id="m-tern">+1</div>
+    <div class="meter-sub">-1 · 0 · +1</div>
+  </div>
+  <div class="meter-box">
+    <div class="meter-label">COMPRESSION</div>
+    <div class="meter-val" id="m-comp">0.004717</div>
+    <div class="meter-sub">val / 212</div>
+  </div>
+  <div class="meter-box">
+    <div class="meter-label">QUAD ANGLE</div>
+    <div class="meter-val" id="m-quad">0°</div>
+    <div class="meter-sub">4 quads · 90°/step</div>
+  </div>
+  <div class="meter-box">
+    <div class="meter-label">LOOP</div>
+    <div class="meter-val" id="m-loop">1</div>
+    <div class="meter-sub">35.7 to saturation</div>
+  </div>
+  <div class="meter-box">
+    <div class="meter-label">HARVEST</div>
+    <div class="meter-val" id="m-harv">0</div>
+    <div class="meter-sub">0/0 crossings</div>
+  </div>
+</div>
+
+<div id="quads">
+  <div class="quad" id="q0">Q0</div>
+  <div class="quad" id="q1">Q1</div>
+  <div class="quad" id="q2">Q2</div>
+  <div class="quad" id="q3">Q3</div>
+</div>
+
+<div style="font-size:.6rem;color:#040;letter-spacing:.12rem;margin-bottom:.5rem">FENCES · 0 1 2 4 8</div>
+<div id="fences">
+  <div class="fence" id="f0">0</div>
+  <div class="fence" id="f1">1</div>
+  <div class="fence" id="f2">2</div>
+  <div class="fence" id="f3">4</div>
+  <div class="fence" id="f4">8</div>
+</div>
+
+<div id="energy-wrap">
+  <div id="energy-label">SATURATION · 999/28 ≈ 35.7 LOOPS</div>
+  <div id="energy-bar-bg"><div id="energy-bar"></div></div>
+</div>
+
+<div id="log"><div>— fission cycle initialised —</div></div>
+
+<div class="controls">
+  <button id="btn-play" onclick="togglePlay()">⏸ PAUSE</button>
+  <button onclick="stepOnce()">STEP →</button>
+  <button onclick="setSpeed(600)" id="sp-slow">SLOW</button>
+  <button onclick="setSpeed(300)" id="sp-med" class="active-btn">MED</button>
+  <button onclick="setSpeed(100)" id="sp-fast">FAST</button>
+  <button onclick="resetCycle()">RESET</button>
+</div>
+<div id="step-counter">step 0 / 18 · loop 1</div>
+
+<script>
+const SEQ    = [1,3,6,9,15,21,24,27,0,0,27,24,21,15,9,6,3,1];
+const FENCES = [0,1,2,4,8];
+const FVALS  = ['0','1','2','4','8'];
+
+let step       = 0;
+let loop       = 1;
+let totalHarv  = 0;
+let playing    = true;
+let speed      = 300;
+let timer      = null;
+
+// Build sequence track
+const track = document.getElementById('seq-track');
+SEQ.forEach((v,i)=>{
+  const d = document.createElement('div');
+  d.className = 'seq-cell';
+  d.id = 'sc'+i;
+  d.textContent = v;
+  if(i===8||i===9) d.classList.add('harvest');
+  track.appendChild(d);
+});
+
+function ternary(v){ return v>0?'+1': v===0?'±0':'-1'; }
+function compression(v){ return v>0?(v/212).toFixed(6):'0.000000'; }
+function phase(i){
+  if(i<8)  return 'EXPANDING';
+  if(i<=9) return 'INVERSION · 0/0';
+  return 'CONTRACTING';
+}
+
+function addLog(msg, harvest=false){
+  const log = document.getElementById('log');
+  const d = document.createElement('div');
+  if(harvest) d.className='harvest-line';
+  d.textContent = msg;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+function tick(){
+  const i   = step % SEQ.length;
+  const val = SEQ[i];
+  const ang = (step*90)%360;
+  const fi  = step % FENCES.length;
+  const ph  = phase(i);
+  const isHarv = (i===8||i===9);
+
+  // Sequence cells
+  SEQ.forEach((_,x)=>{
+    const el = document.getElementById('sc'+x);
+    el.classList.remove('active','done');
+    if(x===i) el.classList.add('active');
+    else if(x<i) el.classList.add('done');
+  });
+
+  // Toroid
+  const tor = document.getElementById('toroid');
+  tor.className = i<8?'expand': i<=9?'invert':'contract';
+
+  // Phase label
+  document.getElementById('phase-label').textContent = ph;
+
+  // Meters
+  document.getElementById('m-val').textContent  = val;
+  document.getElementById('m-tern').textContent = ternary(val);
+  document.getElementById('m-comp').textContent = compression(val);
+  document.getElementById('m-quad').textContent = ang+'°';
+  document.getElementById('m-loop').textContent = loop;
+  if(isHarv){ totalHarv++; document.getElementById('m-harv').textContent = totalHarv; }
+
+  // Quads
+  const aq = Math.floor(ang/90);
+  for(let q=0;q<4;q++){
+    document.getElementById('q'+q).classList.toggle('active-q', q===aq);
+    document.getElementById('q'+q).textContent = 'Q'+q+'\n'+((q*90+ang)%360)+'°';
+  }
+
+  // Fences
+  FVALS.forEach((fv,x)=>{
+    document.getElementById('f'+x).classList.toggle('active-f', x===fi);
+  });
+
+  // Energy bar (% of 35.7 loops)
+  const pct = Math.min(100, ((loop-1+(i/SEQ.length))/35.7)*100);
+  document.getElementById('energy-bar').style.width = pct+'%';
+
+  // Log
+  if(isHarv) addLog(`◆ step ${step} | 0/0 INVERSION — energy harvested`, true);
+  else if(i===0 && step>0) addLog(`  loop ${loop} begin`);
+
+  // Counter
+  document.getElementById('step-counter').textContent =
+    `step ${i+1} / ${SEQ.length} · loop ${loop} · total step ${step+1}`;
+
+  // Advance
+  step++;
+  if(step % SEQ.length === 0) loop++;
+}
+
+function togglePlay(){
+  playing = !playing;
+  document.getElementById('btn-play').textContent = playing?'⏸ PAUSE':'▶ PLAY';
+  if(playing) schedule(); else clearTimeout(timer);
+}
+
+function stepOnce(){
+  if(playing){ playing=false; document.getElementById('btn-play').textContent='▶ PLAY'; clearTimeout(timer); }
+  tick();
+}
+
+function setSpeed(ms){
+  speed=ms;
+  ['sp-slow','sp-med','sp-fast'].forEach(id=>document.getElementById(id).classList.remove('active-btn'));
+  const m={600:'sp-slow',300:'sp-med',100:'sp-fast'}[ms];
+  if(m) document.getElementById(m).classList.add('active-btn');
+  if(playing){ clearTimeout(timer); schedule(); }
+}
+
+function schedule(){
+  if(!playing) return;
+  timer = setTimeout(()=>{ tick(); schedule(); }, speed);
+}
+
+function resetCycle(){
+  clearTimeout(timer);
+  step=0; loop=1; totalHarv=0;
+  document.getElementById('m-harv').textContent='0';
+  document.getElementById('energy-bar').style.width='0%';
+  document.getElementById('log').innerHTML='<div>— reset —</div>';
+  SEQ.forEach((_,x)=>{ const el=document.getElementById('sc'+x); el.classList.remove('active','done'); });
+  document.getElementById('step-counter').textContent='step 0 / 18 · loop 1';
+  if(playing) schedule();
+}
+
+// Kick off
+addLog('sequence: '+SEQ.join(' → '));
+addLog('observer recursion: 27×3 = 81');
+tick();
+schedule();
+</script>
+<!-- Machine readable: manifest.json (schema.org/Dataset, JSON-LD) -->
+</body>
+</html>
