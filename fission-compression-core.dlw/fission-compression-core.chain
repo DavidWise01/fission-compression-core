@@ -1,9 +1,9 @@
 ROOT0-DLW-CHAIN-v1
 index : 1318
 slug  : fission-compression-core
-seal  : a095401cc4fd5cdde7f47e2f3d9b199f5f8d7f72cfb7cccf7b2d1e68f5f5a568
-prev  : 253898b6b15591822e3c435410f43f3685354c2998b43bc5a464a9842c379ebe
-link  : bbd14ff1f947445740f691f0d492f5f1284aaff01da05e8b35279db1981ca404
-head  : 41f029ee4eaa0042c67040dc5927434f8e8446341839c86b6a09d79c5fbf30da
+seal  : 55f40a98fe9833e74ad2b4f94b6eec46df514603a31308182c57b3247c989dc1
+prev  : e7c43eae2b0474c59c71cad59719a14a8d09fdab7f839978978810782638f4cd
+link  : 7fe62df7e662d6335437317e66ccfd6244094e784373721735fe52f29aae06f2
+head  : c4d41afeaef76470528856d54d86cf480a0e1c2fc8ebc60fbb9eb8e442585f2b
 
 — the tether: link = sha256(index|slug|seal|prev). the chain head commits to the whole corpus.
